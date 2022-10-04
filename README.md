@@ -9,6 +9,8 @@ GitHub Actions to update aqua-checksums.json. If aqua-checksums.json isn't lates
 
 ## Example
 
+https://github.com/aquaproj/example-update-checksum
+
 ```yaml
 name: Update aqua-checksums.json
 on:
@@ -32,7 +34,7 @@ jobs:
           aqua_version: v1.20.0-2
 
       # https://aquaproj.github.io/docs/reference/checksum
-      - uses: aquaproj/update-checksum@main
+      - uses: aquaproj/update-checksum-action@main
         env:
           # To trigger GitHub Actions Workflow, you should use Personal Access Token or GitHub App token.
           GITHUB_TOKEN: ${{github.token}}
