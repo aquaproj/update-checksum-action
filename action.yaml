@@ -1,0 +1,40 @@
+name: Update aqua-checksums.json
+description: Update aqua-checksums.json
+inputs:
+  working_directory:
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      working-directory: ${{inputs.working_directory}}
+      run: aqua update-checksum -deep
+    - shell: bash
+      id: find
+      working-directory: ${{inputs.working_directory}}
+      run: |
+        if [ -f aqua-checksums.json ]; then
+          echo '::set-output name=checksum_file::aqua-checksums.json'
+        elif [ -f .aqua-checksums.json ]; then
+          echo '::set-output name=action_echo::.aqua-checksums.json'
+        else
+          echo "::error file=aqua-checksums.json::Both aqua-checksums.json and .aqua-checksums.json aren't found"
+          exit 1
+        fi
+    - shell: bash
+      working-directory: ${{inputs.working_directory}}
+      run: git add ${{steps.find.outputs.checksum_file}}
+    - shell: bash
+      working-directory: ${{inputs.working_directory}}
+      run: |
+        if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
+          echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
+          # https://github.com/int128/ghcp
+          ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+            -m "chore(aqua): update $CHECKSUM_FILE" \
+            aqua-checksums.json
+          exit 1
+        fi
+      env:
+        CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
