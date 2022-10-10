@@ -4,7 +4,7 @@ GitHub Actions to update aqua-checksums.json. If aqua-checksums.json isn't lates
 
 ## Requirements
 
-- [int128/ghcp](https://github.com/int128/ghcp)
+- [int128/ghcp](https://github.com/int128/ghcp): You can install ghcp with aqua (`aqua g -i int128/ghcp`)
 - [aqua](https://aquaproj.github.io/)
 
 ## Example
@@ -31,7 +31,7 @@ jobs:
       # Install aqua and int128/ghcp
       - uses: aquaproj/aqua-installer@v1.1.2
         with:
-          aqua_version: v1.20.0-2
+          aqua_version: v1.20.0-5
 
       # https://aquaproj.github.io/docs/reference/checksum
       - uses: aquaproj/update-checksum-action@main
