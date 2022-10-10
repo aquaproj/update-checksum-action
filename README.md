@@ -19,8 +19,6 @@ on:
     paths:
       - aqua.yaml
       - aqua-checksums.json
-env:
-  AQUA_EXPERIMENTAL_CHECKSUM_VERIFICATION: "true" # https://aquaproj.github.io/docs/reference/checksum
 permissions:
   contents: write # required to push a commit to update aqua-checksums.json
 jobs:
@@ -31,7 +29,7 @@ jobs:
       # Install aqua and int128/ghcp
       - uses: aquaproj/aqua-installer@v1.1.2
         with:
-          aqua_version: v1.20.0-5
+          aqua_version: v1.20.0
 
       # https://aquaproj.github.io/docs/reference/checksum
       - uses: aquaproj/update-checksum-action@main
