@@ -1,0 +1,54 @@
+---
+name: Update aqua-checksums.json
+on:
+  workflow_call:
+    secrets:
+      app_id:
+        required: false
+      app_private_key:
+        required: false
+      gh_token:
+        required: false
+      aqua_version:
+        required: true
+      working_directory:
+        required: false
+        default: ""
+
+permissions:
+  contents: write # required to push a commit to update aqua-checksums.json
+
+concurrency:
+  group: ${{ github.workflow }}--${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  aqua-update-checksum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: aquaproj/aqua-installer@v1.1.2
+        with:
+          aqua_version: ${{ inputs.aqua_version }}
+          working_directory: ${{ inputs.working_directory }}
+
+      - uses: aquaproj/update-checksum-action@v0.1.0
+        if: 'inputs.gh_token != ""'
+        env:
+          # To trigger GitHub Actions Workflow, you should use Personal Access Token or GitHub App token.
+          GITHUB_TOKEN: ${{inputs.gh_token}}
+
+      - name: Generate token
+        if: inputs.gh_token == ''
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ inputs.app_id }}
+          private_key: ${{ inputs.app_private_key }}
+
+      - uses: aquaproj/update-checksum-action@v0.1.0
+        if: inputs.gh_token == ''
+        env:
+          # To trigger GitHub Actions Workflow, you should use Personal Access Token or GitHub App token.
+          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}}
