@@ -15,9 +15,9 @@ runs:
       working-directory: ${{inputs.working_directory}}
       run: |
         if [ -f aqua-checksums.json ]; then
-          echo '::set-output name=checksum_file::aqua-checksums.json'
+          echo "checksum_file=aqua-checksums.json" >> $GITHUB_OUTPUT
         elif [ -f .aqua-checksums.json ]; then
-          echo '::set-output name=action_echo::.aqua-checksums.json'
+          echo "checksum_file=.aqua-checksums.json" >> $GITHUB_OUTPUT
         else
           echo "::error file=aqua-checksums.json::Both aqua-checksums.json and .aqua-checksums.json aren't found"
           exit 1
