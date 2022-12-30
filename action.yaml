@@ -4,12 +4,21 @@ inputs:
   working_directory:
     required: false
     default: ""
+  prune:
+    required: false
+    default: false
 runs:
   using: composite
   steps:
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep
+      if: "! fromJSON(inputs.prune)"
+    - shell: bash
+      working-directory: ${{inputs.working_directory}}
+      run: aqua update-checksum -deep -prune
+      if: fromJSON(inputs.prune)
+
     - shell: bash
       id: find
       working-directory: ${{inputs.working_directory}}
