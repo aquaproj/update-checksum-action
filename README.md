@@ -23,6 +23,7 @@ $ aqua g -i int128/ghcp
 ## Inputs
 
 - `working_directory`
+- `prune`
 
 ## Required Environment Variables
 
