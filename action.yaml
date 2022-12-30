@@ -13,11 +13,11 @@ runs:
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep
-      if: "! inputs.prune"
+      if: "! fromJSON(inputs.prune)"
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep -prune
-      if: inputs.prune
+      if: fromJSON(inputs.prune)
 
     - shell: bash
       id: find
