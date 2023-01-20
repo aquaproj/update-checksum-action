@@ -42,7 +42,7 @@ runs:
           # https://github.com/int128/ghcp
           branch=${GITHUB_HEAD_REF:-}
           if [ -z "$branch" ]; then
-            branch=$GITHUB_REF
+            branch=$GITHUB_REF_NAME
           fi
           ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
             -m "chore(aqua): update $CHECKSUM_FILE" \
