@@ -40,7 +40,11 @@ runs:
         if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
           echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
           # https://github.com/int128/ghcp
-          ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+          branch=${GITHUB_HEAD_REF:-}
+          if [ -z "$branch" ]; then
+            branch=$GITHUB_REF
+          fi
+          ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
             -m "chore(aqua): update $CHECKSUM_FILE" \
             aqua-checksums.json
           exit 1
