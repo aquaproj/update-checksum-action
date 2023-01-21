@@ -24,6 +24,7 @@ $ aqua g -i int128/ghcp
 
 - `working_directory`
 - `prune`
+- `skip_push`
 
 ## Required Environment Variables
 
