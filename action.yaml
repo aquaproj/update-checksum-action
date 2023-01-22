@@ -40,7 +40,7 @@ runs:
 
     - shell: bash
       working-directory: ${{inputs.working_directory}}
-      if: inputs.skip_push
+      if: fromJSON(inputs.skip_push)
       run: |
         if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
           echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
@@ -51,7 +51,7 @@ runs:
 
     - shell: bash
       working-directory: ${{inputs.working_directory}}
-      if: "! inputs.skip_push"
+      if: "! fromJSON(inputs.skip_push)"
       run: |
         if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
           echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
