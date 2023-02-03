@@ -49,7 +49,6 @@ on:
       - aqua-checksums.json
 jobs:
   update-aqua-checksums:
-    needs: path-filter
     uses: aquaproj/update-checksum-action/.github/workflows/update-checksum.yaml@d0f60c5e83d035616de1e73d2b75f56b167f173e # v0.1.5
     permissions:
       contents: read
