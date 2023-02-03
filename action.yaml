@@ -62,7 +62,7 @@ runs:
           fi
           ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
             -m "chore(aqua): update $CHECKSUM_FILE" \
-            aqua-checksums.json
+            "$CHECKSUM_FILE"
           exit 1
         fi
       env:
