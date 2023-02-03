@@ -6,6 +6,10 @@ About aqua's Checksum Verification, please see the document too.
 
 https://aquaproj.github.io/docs/reference/checksum
 
+## Reusable Workflow
+
+Please see [update-checksum-workflow](https://github.com/aquaproj/update-checksum-workflow).
+
 ## Requirements
 
 - [aqua](https://aquaproj.github.io/)
@@ -33,33 +37,6 @@ $ aqua g -i int128/ghcp
 ## Outputs
 
 Nothing.
-
-## Reusable Workflow
-
-[Workflow](.github/workflows/update-checksum.yaml)
-
-### Eample
-
-```yaml
-name: update-aqua-checksum
-on:
-  pull_request:
-    paths:
-      - aqua.yaml
-      - aqua-checksums.json
-jobs:
-  update-aqua-checksums:
-    uses: aquaproj/update-checksum-action/.github/workflows/update-checksum.yaml@d0f60c5e83d035616de1e73d2b75f56b167f173e # v0.1.5
-    permissions:
-      contents: read
-    with:
-      aqua_policy_config: aqua-policy.yaml
-      aqua_version: v1.32.3
-      prune: true
-    secrets:
-      gh_app_id: ${{secrets.APP_ID}}
-      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
-```
 
 ## LICENSE
 
