@@ -26,14 +26,14 @@ runs:
       id: find
       working-directory: ${{inputs.working_directory}}
       run: |
-        if [ -f aqua-checksums.json ]; then
-          echo "checksum_file=aqua-checksums.json" >> $GITHUB_OUTPUT
-        elif [ -f .aqua-checksums.json ]; then
-          echo "checksum_file=.aqua-checksums.json" >> $GITHUB_OUTPUT
-        else
-          echo "::error file=aqua-checksums.json::Both aqua-checksums.json and .aqua-checksums.json aren't found"
-          exit 1
-        fi
+        for p in aqua-checksums.json .aqua-checksums.json aquaproj/aqua-checksums.json aquaproj/.aqua-checksums.json .aquaproj/aqua-checksums.json .aquaproj/.aqua-checksums.json; do
+          if [ -f "$p" ]; then
+            echo "checksum_file=$p" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        done
+        echo "::error ::aqua checksum json file isn't found"
+        exit 1
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: git add ${{steps.find.outputs.checksum_file}}
