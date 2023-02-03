@@ -10,6 +10,14 @@ on:
       aqua_version:
         required: true
         type: string
+      working_directory:
+        required: false
+        default: ""
+        type: string
+      prune:
+        required: false
+        default: false
+        type: boolean
     secrets:
       gh_app_id:
         required: false
@@ -46,8 +54,9 @@ jobs:
           AQUA_GITHUB_TOKEN: ${{github.token}}
       - uses: aquaproj/update-checksum-action@4bb09f359f2ecdb20aa9bc61684f5f9d185be909 # v0.1.4
         with:
-          prune: true
           skip_push: ${{github.event.pull_request.head.repo.fork}}
+          prune: ${{inputs.prune}}
+          working_directory: ${{inputs.working_directory}}
         env:
           # To trigger GitHub Actions Workflow by pushing a commit, GitHub App token is required.
           # github.token doesn't trigger GitHub Actions Workflow.
