@@ -26,7 +26,7 @@ runs:
       id: find
       working-directory: ${{inputs.working_directory}}
       run: |
-        for p in aqua-checksums.json .aqua-checksums.json aquaproj/aqua-checksums.json aquaproj/.aqua-checksums.json .aquaproj/aqua-checksums.json .aquaproj/.aqua-checksums.json; do
+        for p in aqua-checksums.json .aqua-checksums.json aqua/aqua-checksums.json aqua/.aqua-checksums.json .aqua/aqua-checksums.json .aqua/.aqua-checksums.json; do
           if [ -f "$p" ]; then
             echo "checksum_file=$p" >> $GITHUB_OUTPUT
             exit 0
