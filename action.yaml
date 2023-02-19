@@ -53,17 +53,24 @@ runs:
       working-directory: ${{inputs.working_directory}}
       if: "! fromJSON(inputs.skip_push)"
       run: |
-        if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
-          echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
-          # https://github.com/int128/ghcp
-          branch=${GITHUB_HEAD_REF:-}
-          if [ -z "$branch" ]; then
-            branch=$GITHUB_REF_NAME
-          fi
-          ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
-            -m "chore(aqua): update $CHECKSUM_FILE" \
-            "$CHECKSUM_FILE"
+        if git diff --cached --exit-code ${CHECKSUM_FILE}; then
+          exit 0
+        fi
+        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
+
+        if ! ghcp -v; then
+          echo "::error ::int128/ghcp isn't installed. To push a commit, ghcp is required."
           exit 1
         fi
+
+        # https://github.com/int128/ghcp
+        branch=${GITHUB_HEAD_REF:-}
+        if [ -z "$branch" ]; then
+          branch=$GITHUB_REF_NAME
+        fi
+        ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
+          -m "chore(aqua): update $CHECKSUM_FILE" \
+          "$CHECKSUM_FILE"
+        exit 1
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
