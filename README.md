@@ -4,7 +4,7 @@ GitHub Actions to update aqua-checksums.json. If aqua-checksums.json isn't lates
 
 About aqua's Checksum Verification, please see the document too.
 
-https://aquaproj.github.io/docs/reference/checksum
+https://aquaproj.github.io/docs/security/checksum
 
 ## Reusable Workflow
 
