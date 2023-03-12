@@ -42,11 +42,11 @@ runs:
       if: fromJSON(inputs.skip_push)
       run: |
         set -eu
-        if [ -z "$WORKING_DIR" ]; then
-          WORKING_DIR=.
+        if [ -n "$WORKING_DIR" ]; then
+          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
         fi
-        if ! git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
-          echo "::error file=${WORKING_DIR}/${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
+        if ! git diff --cached --exit-code "${CHECKSUM_FILE}"; then
+          echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
           exit 1
         fi
       env:
@@ -57,13 +57,13 @@ runs:
       if: "! fromJSON(inputs.skip_push)"
       run: |
         set -eu
-        if [ -z "$WORKING_DIR" ]; then
-          WORKING_DIR=.
+        if [ -n "$WORKING_DIR" ]; then
+          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
         fi
-        if git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
+        if git diff --cached --exit-code "${CHECKSUM_FILE}"; then
           exit 0
         fi
-        echo "::error file=${WORKING_DIR}/${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
+        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
 
         if ! ghcp -v; then
           echo "::error ::int128/ghcp isn't installed. To push a commit, ghcp is required."
@@ -77,7 +77,7 @@ runs:
         fi
         ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
           -m "chore(aqua): update $CHECKSUM_FILE" \
-          "${WORKING_DIR}/$CHECKSUM_FILE"
+          "$CHECKSUM_FILE"
         exit 1
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
