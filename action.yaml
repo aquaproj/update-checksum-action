@@ -3,7 +3,6 @@ description: Update aqua-checksums.json
 inputs:
   working_directory:
     required: false
-    default: ""
   prune:
     required: false
     default: false
@@ -26,6 +25,7 @@ runs:
       id: find
       working-directory: ${{inputs.working_directory}}
       run: |
+        set -eu
         for p in aqua-checksums.json .aqua-checksums.json aqua/aqua-checksums.json aqua/.aqua-checksums.json .aqua/aqua-checksums.json .aqua/.aqua-checksums.json; do
           if [ -f "$p" ]; then
             echo "checksum_file=$p" >> $GITHUB_OUTPUT
@@ -41,6 +41,10 @@ runs:
     - shell: bash
       if: fromJSON(inputs.skip_push)
       run: |
+        set -eu
+        if [ -z "$WORKING_DIR" ]; then
+          WORKING_DIR=.
+        fi
         if ! git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
           echo "::error file=${WORKING_DIR}/${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
           exit 1
@@ -52,6 +56,10 @@ runs:
     - shell: bash
       if: "! fromJSON(inputs.skip_push)"
       run: |
+        set -eu
+        if [ -z "$WORKING_DIR" ]; then
+          WORKING_DIR=.
+        fi
         if git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
           exit 0
         fi
