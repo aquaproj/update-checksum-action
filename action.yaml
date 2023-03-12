@@ -39,24 +39,23 @@ runs:
       run: git add ${{steps.find.outputs.checksum_file}}
 
     - shell: bash
-      working-directory: ${{inputs.working_directory}}
       if: fromJSON(inputs.skip_push)
       run: |
-        if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
-          echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
+        if ! git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
+          echo "::error file=${WORKING_DIR}/${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
           exit 1
         fi
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
+        WORKING_DIR: ${{inputs.working_directory}}
 
     - shell: bash
-      working-directory: ${{inputs.working_directory}}
       if: "! fromJSON(inputs.skip_push)"
       run: |
-        if git diff --cached --exit-code ${CHECKSUM_FILE}; then
+        if git diff --cached --exit-code "${WORKING_DIR}/${CHECKSUM_FILE}"; then
           exit 0
         fi
-        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
+        echo "::error file=${WORKING_DIR}/${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
 
         if ! ghcp -v; then
           echo "::error ::int128/ghcp isn't installed. To push a commit, ghcp is required."
@@ -70,7 +69,8 @@ runs:
         fi
         ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
           -m "chore(aqua): update $CHECKSUM_FILE" \
-          "$CHECKSUM_FILE"
+          "${WORKING_DIR}/$CHECKSUM_FILE"
         exit 1
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
+        WORKING_DIR: ${{inputs.working_directory}}
