@@ -3,7 +3,6 @@ description: Update aqua-checksums.json
 inputs:
   working_directory:
     required: false
-    default: ""
   prune:
     required: false
     default: false
@@ -26,6 +25,7 @@ runs:
       id: find
       working-directory: ${{inputs.working_directory}}
       run: |
+        set -eu
         for p in aqua-checksums.json .aqua-checksums.json aqua/aqua-checksums.json aqua/.aqua-checksums.json .aqua/aqua-checksums.json .aqua/.aqua-checksums.json; do
           if [ -f "$p" ]; then
             echo "checksum_file=$p" >> $GITHUB_OUTPUT
@@ -39,21 +39,28 @@ runs:
       run: git add ${{steps.find.outputs.checksum_file}}
 
     - shell: bash
-      working-directory: ${{inputs.working_directory}}
       if: fromJSON(inputs.skip_push)
       run: |
-        if ! git diff --cached --exit-code ${CHECKSUM_FILE}; then
+        set -eu
+        if [ -n "$WORKING_DIR" ]; then
+          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
+        fi
+        if ! git diff --cached --exit-code "${CHECKSUM_FILE}"; then
           echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
           exit 1
         fi
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
+        WORKING_DIR: ${{inputs.working_directory}}
 
     - shell: bash
-      working-directory: ${{inputs.working_directory}}
       if: "! fromJSON(inputs.skip_push)"
       run: |
-        if git diff --cached --exit-code ${CHECKSUM_FILE}; then
+        set -eu
+        if [ -n "$WORKING_DIR" ]; then
+          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
+        fi
+        if git diff --cached --exit-code "${CHECKSUM_FILE}"; then
           exit 0
         fi
         echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
@@ -74,3 +81,4 @@ runs:
         exit 1
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
+        WORKING_DIR: ${{inputs.working_directory}}
