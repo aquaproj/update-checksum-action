@@ -15,11 +15,11 @@ runs:
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep
-      if: "! fromJSON(inputs.prune)"
+      if: inputs.prune != 'true'
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep -prune
-      if: fromJSON(inputs.prune)
+      if: inputs.prune == 'true'
 
     - shell: bash
       id: find
@@ -39,7 +39,7 @@ runs:
       run: git add ${{steps.find.outputs.checksum_file}}
 
     - shell: bash
-      if: fromJSON(inputs.skip_push)
+      if: inputs.skip_push == 'true'
       run: |
         set -eu
         if [ -n "$WORKING_DIR" ]; then
@@ -54,7 +54,7 @@ runs:
         WORKING_DIR: ${{inputs.working_directory}}
 
     - shell: bash
-      if: "! fromJSON(inputs.skip_push)"
+      if: inputs.skip_push != 'true'
       run: |
         set -eu
         if [ -n "$WORKING_DIR" ]; then
