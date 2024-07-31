@@ -30,8 +30,8 @@ jobs:
     if: |
       ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
     secrets:
-      gh_app_id: ${{secrets.APP_ID}}
-      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
+      gh_app_id: ${{secrets.APP_ID_AQUAPROJ_AQUA}}
+      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY_AQUAPROJ_AQUA}}
 
   status-check:
     uses: ./.github/workflows/wc-status-check.yaml
@@ -53,5 +53,5 @@ jobs:
     needs: path-filter
     permissions: {}
     secrets:
-      gh_app_id: ${{secrets.APP_ID}}
-      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
+      gh_app_id: ${{secrets.APP_ID_AQUAPROJ_AQUA}}
+      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY_AQUAPROJ_AQUA}}
