@@ -28,11 +28,15 @@ jobs:
             [
               "${{github.event.repository.name}}"
             ]
+      - uses: aquaproj/aqua-installer@v3.0.1
+        env:
+          GITHUB_TOKEN: ${{github.token}}
       - uses: ./
         with:
           prune: true
         env:
           GITHUB_TOKEN: ${{steps.token.outputs.token}}
+      - run: rm aqua.yaml # To exclude aqua.yaml from the test of foo
       - uses: ./
         with:
           prune: true
