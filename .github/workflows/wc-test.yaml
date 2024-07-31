@@ -1,0 +1,42 @@
+---
+name: test
+on:
+  workflow_call:
+    secrets:
+      gh_app_id:
+        required: true
+      gh_app_private_key:
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+      - uses: suzuki-shunsuke/github-token-action@350d7506222e3a0016491abe85b5c4dd475b67d1 # v0.2.1
+        id: token
+        with:
+          github_app_id: ${{secrets.gh_app_id}}
+          github_app_private_key: ${{secrets.gh_app_private_key}}
+          default_github_token: ${{github.token}}
+          github_app_permissions: >-
+            {
+              "contents": "write"
+            }
+          github_app_repositories: >-
+            [
+              "${{github.event.repository.name}}"
+            ]
+      - uses: ./
+        with:
+          prune: true
+        env:
+          GITHUB_TOKEN: ${{steps.token.outputs.token}}
+      - uses: ./
+        with:
+          prune: true
+          working_directory: foo
+        env:
+          GITHUB_TOKEN: ${{steps.token.outputs.token}}
+
