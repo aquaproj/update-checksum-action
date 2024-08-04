@@ -38,7 +38,8 @@ jobs:
           prune: true
         env:
           GITHUB_TOKEN: ${{steps.token.outputs.token}}
-      - run: rm aqua.yaml # To exclude aqua.yaml from the test of foo
+      # TODO https://github.com/aquaproj/update-checksum-action/issues/47
+      # - run: rm aqua.yaml # To exclude aqua.yaml from the test of foo
       - uses: ./
         with:
           prune: true
