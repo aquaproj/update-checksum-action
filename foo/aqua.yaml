@@ -10,4 +10,4 @@ registries:
   - type: standard
     ref: v4.224.0 # renovate: depName=aquaproj/aqua-registry
 packages:
-  - name: int128/ghcp@v1.13.3
+  - name: int128/ghcp@v1.13.4
