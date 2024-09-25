@@ -9,6 +9,13 @@ inputs:
   skip_push:
     required: false
     default: false
+  read_checksum_token:
+    required: false
+    default: ''  # empty string replaced by `env.GITHUB_TOKEN`
+    description: |
+      This token to be used when executes `aqua update-checksum`. It must have `contents:read` permission about all repositories
+      in tools managed by `aqua`. By default, `env.GITHUB_TOKEN` is used.
+      This input is useful to fetch checksum from private repositories.
 runs:
   using: composite
   steps:
@@ -16,10 +23,14 @@ runs:
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep
       if: inputs.prune != 'true'
+      env:
+        GITHUB_TOKEN: ${{ (inputs.read_checksum_token != '') &&  inputs.read_checksum_token || env.GITHUB_TOKEN }}
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep -prune
       if: inputs.prune == 'true'
+      env:
+        GITHUB_TOKEN: ${{ (inputs.read_checksum_token != '') &&  inputs.read_checksum_token || env.GITHUB_TOKEN }}
 
     - shell: bash
       id: find
