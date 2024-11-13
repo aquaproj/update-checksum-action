@@ -68,9 +68,6 @@ runs:
       run: |
         set -eu
 
-        export AQUA_GLOBAL_CONFIG="$GITHUB_ACTION_PATH/aqua.yaml:${AQUA_GLOBAL_CONFIG:-}"
-        aqua -c "$GITHUB_ACTION_PATH/aqua.yaml" i -l
-
         if [ -n "$WORKING_DIR" ]; then
           CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
         fi
@@ -89,7 +86,7 @@ runs:
         if [ -z "$branch" ]; then
           branch=$GITHUB_REF_NAME
         fi
-        ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
+        aqua -c "$GITHUB_ACTION_PATH/aqua.yaml" exec -- ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
           -m "chore(aqua): update $CHECKSUM_FILE" \
           "$CHECKSUM_FILE"
         exit 1
