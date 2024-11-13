@@ -76,12 +76,6 @@ runs:
         fi
         echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
 
-        if ! ghcp -v; then
-          echo "::error ::int128/ghcp isn't installed. To push a commit, ghcp is required."
-          exit 1
-        fi
-
-        # https://github.com/int128/ghcp
         branch=${GITHUB_HEAD_REF:-}
         if [ -z "$branch" ]; then
           branch=$GITHUB_REF_NAME
