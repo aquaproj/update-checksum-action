@@ -18,7 +18,6 @@ jobs:
   test:
     uses: ./.github/workflows/workflow_call_test.yaml
     permissions:
-      pull-requests: write
       contents: read
     secrets:
       gh_app_id: ${{secrets.APP_ID_AQUAPROJ_AQUA}}
