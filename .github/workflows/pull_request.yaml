@@ -2,35 +2,24 @@
 name: test
 on: pull_request
 permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  path-filter:
-    # Get changed files to filter jobs
-    outputs:
-      renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
-    runs-on: ubuntu-latest
+  status-check:
+    runs-on: ubuntu-24.04
+    if: failure()
     timeout-minutes: 10
     permissions: {}
+    needs:
+      - test
     steps:
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes
-        with:
-          filters: |
-            renovate-config-validator:
-              - renovate.json5
-              - .github/workflows/test.yaml
-              - .github/workflows/wc-renovate-config-validator.yaml
-
-  renovate-config-validator:
-    uses: ./.github/workflows/wc-renovate-config-validator.yaml
-    needs: path-filter
-    if: needs.path-filter.outputs.renovate-config-validator == 'true'
-    permissions:
-      contents: read
-
+      - run: exit 1
   test:
-    uses: ./.github/workflows/wc-test.yaml
-    needs: path-filter
-    permissions: {}
+    uses: ./.github/workflows/workflow_call_test.yaml
+    permissions:
+      pull-requests: write
+      contents: read
     secrets:
       gh_app_id: ${{secrets.APP_ID_AQUAPROJ_AQUA}}
       gh_app_private_key: ${{secrets.APP_PRIVATE_KEY_AQUAPROJ_AQUA}}
