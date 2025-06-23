@@ -3,18 +3,45 @@ description: Update aqua-checksums.json
 inputs:
   working_directory:
     required: false
+    description: |
+      The working directory where `aqua update-checksum` is executed. If this input is not specified, the current working directory is used.
   prune:
     required: false
-    default: false
+    default: "false"
+    description: |
+      If this input is `true`, `aqua update-checksum` is executed with `-prune` option.
+      This option removes unused checksums from the checksum file.
+      If this input is not specified, `false` is used.
   skip_push:
     required: false
-    default: false
+    default: "false"
+    description: |
+      If this input is `true`, the action checks if the checksum file is up-to-date, but does not push a commit to update it.
+      If this input is not specified, `false` is used.
+      This input is useful when you want to check if the checksum file is up-to-date without pushing a commit.
   read_checksum_token:
     required: false
     default: ''  # When this input is an empty string, it doesn't override `AQUA_GITHUB_TOKEN`.
     description: |
       This token overrides `AQUA_GITHUB_TOKEN` to executes `aqua update-checksum`. It must have `contents:read` permission about all repositories
       in tools managed by `aqua`. This input is useful to fetch checksum from private repositories.
+  securefix_action_server_repository:
+    required: false
+    default: ''
+    description: |
+      The GitHub repository for the Securefix Action server.
+      https://github.com/csm-actions/securefix-action
+      If this is set, this action uses Securefix Action to update aqua-checksums.json.
+  securefix_action_client_app_id:
+    required: false
+    default: ''
+    description: |
+      The GitHub App ID for the Securefix Action client.
+  securefix_action_client_app_private_key:
+    required: false
+    default: ''
+    description: |
+      The GitHub App private key for the Securefix Action client.
 runs:
   using: composite
   steps:
@@ -34,56 +61,50 @@ runs:
     - shell: bash
       id: find
       working-directory: ${{inputs.working_directory}}
+      env:
+        WORKING_DIR: ${{inputs.working_directory}}
       run: |
         set -eu
         for p in aqua-checksums.json .aqua-checksums.json aqua/aqua-checksums.json aqua/.aqua-checksums.json .aqua/aqua-checksums.json .aqua/.aqua-checksums.json; do
           if [ -f "$p" ]; then
-            echo "checksum_file=$p" >> $GITHUB_OUTPUT
+            if [ -n "$WORKING_DIR" ]; then
+              echo "checksum_file=$WORKING_DIR/$p" >> "$GITHUB_OUTPUT"
+            else
+              echo "checksum_file=$p" >> "$GITHUB_OUTPUT"
+            fi
+            changed=false
+            if ! git ls-files --error-unmatch -- "$p" > /dev/null 2>&1; then
+              changed=true
+            elif ! git diff --quiet -- "$p"; then
+              changed=true
+            fi
+            echo "changed=$changed" >> "$GITHUB_OUTPUT"
             exit 0
           fi
         done
         echo "::error ::aqua checksum json file isn't found"
         exit 1
-    - shell: bash
-      working-directory: ${{inputs.working_directory}}
-      run: git add ${{steps.find.outputs.checksum_file}}
 
     - shell: bash
-      if: inputs.skip_push == 'true'
+      if: inputs.skip_push == 'true' && steps.find.outputs.changed == 'true'
       run: |
-        set -eu
-        if [ -n "$WORKING_DIR" ]; then
-          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
-        fi
-        if ! git diff --cached --exit-code "${CHECKSUM_FILE}"; then
-          echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
-          exit 1
-        fi
-      env:
-        CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
-        WORKING_DIR: ${{inputs.working_directory}}
-
-    - shell: bash
-      if: inputs.skip_push != 'true'
-      run: |
-        set -eu
-
-        if [ -n "$WORKING_DIR" ]; then
-          CHECKSUM_FILE="$WORKING_DIR/$CHECKSUM_FILE"
-        fi
-        if git diff --cached --exit-code "${CHECKSUM_FILE}"; then
-          exit 0
-        fi
-        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest. A commit is pushed automatically to update ${CHECKSUM_FILE}."
-
-        branch=${GITHUB_HEAD_REF:-}
-        if [ -z "$branch" ]; then
-          branch=$GITHUB_REF_NAME
-        fi
-        aqua -c "$GITHUB_ACTION_PATH/aqua.yaml" exec -- ghcp commit -r "$GITHUB_REPOSITORY" -b "$branch" \
-          -m "chore(aqua): update $CHECKSUM_FILE" \
-          "$CHECKSUM_FILE"
+        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
         exit 1
       env:
         CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
         WORKING_DIR: ${{inputs.working_directory}}
+
+    - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository == ''
+      uses: suzuki-shunsuke/commit-action@e3299afe2e5ffb76f1987743e3dbc0f00ece72d8 # v0.0.8
+      with:
+        files: ${{steps.find.outputs.checksum_file}}
+        commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
+
+    - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository != ''
+      uses: csm-actions/securefix-action@pr/123
+      with:
+        files: ${{steps.find.outputs.checksum_file}}
+        commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
+        server_repository: ${{inputs.securefix_action_server_repository}}
+        app_id: ${{inputs.securefix_action_client_app_id}}
+        app_private_key: ${{inputs.securefix_action_client_app_private_key}}
