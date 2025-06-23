@@ -32,12 +32,12 @@ inputs:
       The GitHub repository for the Securefix Action server.
       https://github.com/csm-actions/securefix-action
       If this is set, this action uses Securefix Action to update aqua-checksums.json.
-  securefix_action_client_app_id:
+  securefix_action_app_id:
     required: false
     default: ''
     description: |
       The GitHub App ID for the Securefix Action client.
-  securefix_action_client_app_private_key:
+  securefix_action_app_private_key:
     required: false
     default: ''
     description: |
@@ -106,5 +106,5 @@ runs:
         files: ${{steps.find.outputs.checksum_file}}
         commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
         server_repository: ${{inputs.securefix_action_server_repository}}
-        app_id: ${{inputs.securefix_action_client_app_id}}
-        app_private_key: ${{inputs.securefix_action_client_app_private_key}}
+        app_id: ${{inputs.securefix_action_app_id}}
+        app_private_key: ${{inputs.securefix_action_app_private_key}}
