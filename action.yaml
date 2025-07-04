@@ -101,7 +101,7 @@ runs:
         commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
 
     - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository != ''
-      uses: csm-actions/securefix-action@pr/123
+      uses: csm-actions/securefix-action@93104f33820be53834509335ed722a209d3714f3 # v0.1.1-0
       with:
         files: ${{steps.find.outputs.checksum_file}}
         commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
