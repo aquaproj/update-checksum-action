@@ -19,6 +19,11 @@ inputs:
       If this input is `true`, the action checks if the checksum file is up-to-date, but does not push a commit to update it.
       If this input is not specified, `false` is used.
       This input is useful when you want to check if the checksum file is up-to-date without pushing a commit.
+  github_token:
+    required: false
+    default: ${{github.token}}
+    description: |
+      GitHub Access token.
   read_checksum_token:
     required: false
     default: ''  # When this input is an empty string, it doesn't override `AQUA_GITHUB_TOKEN`.
@@ -50,13 +55,13 @@ runs:
       run: aqua update-checksum -deep
       if: inputs.prune != 'true'
       env:
-        AQUA_GITHUB_TOKEN: ${{ (inputs.read_checksum_token != '') &&  inputs.read_checksum_token || env.AQUA_GITHUB_TOKEN }}
+        AQUA_GITHUB_TOKEN: ${{(inputs.read_checksum_token != '') && inputs.read_checksum_token || (inputs.github_token != '' && inputs.github_token || env.AQUA_GITHUB_TOKEN)}}
     - shell: bash
       working-directory: ${{inputs.working_directory}}
       run: aqua update-checksum -deep -prune
       if: inputs.prune == 'true'
       env:
-        AQUA_GITHUB_TOKEN: ${{ (inputs.read_checksum_token != '') &&  inputs.read_checksum_token || env.AQUA_GITHUB_TOKEN }}
+        AQUA_GITHUB_TOKEN: ${{(inputs.read_checksum_token != '') && inputs.read_checksum_token || (inputs.github_token != '' && inputs.github_token || env.AQUA_GITHUB_TOKEN)}}
 
     - shell: bash
       id: find
@@ -99,6 +104,7 @@ runs:
       with:
         files: ${{steps.find.outputs.checksum_file}}
         commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
+        github_token: ${{inputs.github_token != '' && inputs.github_token || env.GITHUB_TOKEN}}
 
     - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository != ''
       uses: csm-actions/securefix-action@93104f33820be53834509335ed722a209d3714f3 # v0.1.1-0
