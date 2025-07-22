@@ -107,7 +107,7 @@ runs:
         github_token: ${{inputs.github_token != '' && inputs.github_token || env.GITHUB_TOKEN}}
 
     - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository != ''
-      uses: csm-actions/securefix-action@93104f33820be53834509335ed722a209d3714f3 # v0.1.1-0
+      uses: csm-actions/securefix-action@758a17e6f52a70ab0d8102ef1cd13cd0107206e6 # v0.2.0-0
       with:
         files: ${{steps.find.outputs.checksum_file}}
         commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
