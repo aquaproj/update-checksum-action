@@ -33,18 +33,14 @@ jobs:
       - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
         with:
           aqua_version: v2.53.9
-        env:
-          GITHUB_TOKEN: ${{github.token}}
       - uses: ./
         with:
           prune: true
-        env:
-          GITHUB_TOKEN: ${{steps.token.outputs.token}}
+          github_token: ${{steps.token.outputs.token}}
       # TODO https://github.com/aquaproj/update-checksum-action/issues/47
       # - run: rm aqua.yaml # To exclude aqua.yaml from the test of foo
       - uses: ./
         with:
           prune: true
           working_directory: foo
-        env:
-          GITHUB_TOKEN: ${{steps.token.outputs.token}}
+          github_token: ${{steps.token.outputs.token}}
