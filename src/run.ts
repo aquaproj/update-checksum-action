@@ -46,7 +46,7 @@ const getAquaGitHubToken = (inputs: Inputs): string => {
 };
 
 const runAquaUpdateChecksum = async (inputs: Inputs): Promise<void> => {
-  const args = ["update-checksum", "-deep"];
+  const args = ["update-checksum"];
   if (inputs.prune) {
     args.push("-prune");
   }
