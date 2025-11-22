@@ -33,10 +33,12 @@ jobs:
     permissions:
       contents: read
 
-  test:
-    uses: ./.github/workflows/wc-test.yaml
-    needs: path-filter
-    permissions: {}
-    secrets:
-      gh_app_id: ${{secrets.gh_app_id}}
-      gh_app_private_key: ${{secrets.gh_app_private_key}}
+  create-pr-branch:
+    uses: ./.github/workflows/wc-create-pr-branch.yaml
+    if: github.event.pull_request.user.login == 'suzuki-shunsuke'
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      version: pr/${{github.event.pull_request.number}}
+      pr: ${{github.event.pull_request.number}}
