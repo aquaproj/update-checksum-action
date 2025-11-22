@@ -203,4 +203,5 @@ export const main = async () => {
 
   // Create commit
   await createCommitIfNeeded(inputs, checksumFile);
+  throw new Error(`${checksumFileOutput} is updated.`);
 };
