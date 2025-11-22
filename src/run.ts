@@ -22,7 +22,8 @@ const getInputs = (): Inputs => {
     workingDirectory: core.getInput("working_directory"),
     prune: core.getInput("prune") === "true",
     skipPush: core.getInput("skip_push") === "true",
-    githubToken: core.getInput("github_token") || process.env.GITHUB_TOKEN || "",
+    githubToken:
+      core.getInput("github_token") || process.env.GITHUB_TOKEN || "",
     readChecksumToken: core.getInput("read_checksum_token"),
     securefixActionServerRepository: core.getInput(
       "securefix_action_server_repository",
