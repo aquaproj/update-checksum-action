@@ -47,70 +47,11 @@ inputs:
     default: ''
     description: |
       The GitHub App private key for the Securefix Action client.
+outputs:
+  checksum_file:
+    description: Path to the checksum file that was found
+  changed:
+    description: Whether the checksum file has changed (true/false)
 runs:
-  using: composite
-  steps:
-    - shell: bash
-      working-directory: ${{inputs.working_directory}}
-      run: aqua update-checksum -deep
-      if: inputs.prune != 'true'
-      env:
-        AQUA_GITHUB_TOKEN: ${{(inputs.read_checksum_token != '') && inputs.read_checksum_token || (inputs.github_token != '' && inputs.github_token || env.AQUA_GITHUB_TOKEN)}}
-    - shell: bash
-      working-directory: ${{inputs.working_directory}}
-      run: aqua update-checksum -deep -prune
-      if: inputs.prune == 'true'
-      env:
-        AQUA_GITHUB_TOKEN: ${{(inputs.read_checksum_token != '') && inputs.read_checksum_token || (inputs.github_token != '' && inputs.github_token || env.AQUA_GITHUB_TOKEN)}}
-
-    - shell: bash
-      id: find
-      working-directory: ${{inputs.working_directory}}
-      env:
-        WORKING_DIR: ${{inputs.working_directory}}
-      run: |
-        set -eu
-        for p in aqua-checksums.json .aqua-checksums.json aqua/aqua-checksums.json aqua/.aqua-checksums.json .aqua/aqua-checksums.json .aqua/.aqua-checksums.json; do
-          if [ -f "$p" ]; then
-            if [ -n "$WORKING_DIR" ]; then
-              echo "checksum_file=$WORKING_DIR/$p" >> "$GITHUB_OUTPUT"
-            else
-              echo "checksum_file=$p" >> "$GITHUB_OUTPUT"
-            fi
-            changed=false
-            if ! git ls-files --error-unmatch -- "$p" > /dev/null 2>&1; then
-              changed=true
-            elif ! git diff --quiet -- "$p"; then
-              changed=true
-            fi
-            echo "changed=$changed" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-        done
-        echo "::error ::aqua checksum json file isn't found"
-        exit 1
-
-    - shell: bash
-      if: inputs.skip_push == 'true' && steps.find.outputs.changed == 'true'
-      run: |
-        echo "::error file=${CHECKSUM_FILE}::${CHECKSUM_FILE} isn't latest."
-        exit 1
-      env:
-        CHECKSUM_FILE: ${{steps.find.outputs.checksum_file}}
-        WORKING_DIR: ${{inputs.working_directory}}
-
-    - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository == ''
-      uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
-      with:
-        files: ${{steps.find.outputs.checksum_file}}
-        commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
-        github_token: ${{inputs.github_token != '' && inputs.github_token || env.GITHUB_TOKEN}}
-
-    - if: inputs.skip_push != 'true' && steps.find.outputs.changed == 'true' && inputs.securefix_action_server_repository != ''
-      uses: csm-actions/securefix-action@949d3cfb554abee10f695014674759978ba8ba34 # v0.4.1
-      with:
-        files: ${{steps.find.outputs.checksum_file}}
-        commit_message: "chore(aqua): update ${{steps.find.outputs.checksum_file}}"
-        server_repository: ${{inputs.securefix_action_server_repository}}
-        app_id: ${{inputs.securefix_action_app_id}}
-        app_private_key: ${{inputs.securefix_action_app_private_key}}
+  using: node20
+  main: dist/index.js
